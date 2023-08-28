@@ -35,6 +35,9 @@ type node[T any] struct {
 
 // NewLLRBTree creates a new LLRB-Tree with the given compare function.
 func NewLLRBTree[T any](compare CompareFunc[T]) *LLRBTree[T] {
+	if compare == nil {
+		panic("nil compare")
+	}
 	return &LLRBTree[T]{
 		compare: compare,
 	}
@@ -44,7 +47,7 @@ func NewLLRBTree[T any](compare CompareFunc[T]) *LLRBTree[T] {
 // already equals the given one, it is removed from the tree and returned,
 // and the second return value is true.  Otherwise, (zeroValue, false)
 //
-// nil cannot be added to the tree (will panic).
+// nil cannot be added to the tree (undefined behavior).
 func (t *LLRBTree[T]) ReplaceOrInsert(item T) (prev T, exist bool) {
 	t.root, prev, exist = t.insert(t.root, item)
 	t.root.color = _black

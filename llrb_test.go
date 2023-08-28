@@ -15,6 +15,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewLLRBTree(t *testing.T) {
+	assert.PanicsWithValue(t, "nil compare", func() {
+		_ = NewLLRBTree[int](nil)
+	})
+}
+
 func TestLLRBTree_insert(t *testing.T) {
 	const N = 1000
 	const LOOP = 100
