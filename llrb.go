@@ -10,6 +10,8 @@
 // for operations, but is designed to be easier to implement.
 package llrb
 
+import "cmp"
+
 const (
 	_red   = true
 	_black = false
@@ -33,13 +35,20 @@ type node[T any] struct {
 	color       bool
 }
 
-// NewLLRBTree creates a new LLRB-Tree with the given compare function.
-func NewLLRBTree[T any](compare CompareFunc[T]) *LLRBTree[T] {
+// New creates a new LLRB-Tree with the given compare function.
+func New[T any](compare CompareFunc[T]) *LLRBTree[T] {
 	if compare == nil {
 		panic("nil compare")
 	}
 	return &LLRBTree[T]{
 		compare: compare,
+	}
+}
+
+// NewOrdered creates a new LLRB-Tree for ordered types.
+func NewOrdered[T cmp.Ordered]() *LLRBTree[T] {
+	return &LLRBTree[T]{
+		compare: cmp.Compare[T],
 	}
 }
 

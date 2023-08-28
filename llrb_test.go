@@ -5,7 +5,6 @@
 package llrb
 
 import (
-	"cmp"
 	"math"
 	"math/rand"
 	"runtime"
@@ -17,7 +16,7 @@ import (
 
 func TestNewLLRBTree(t *testing.T) {
 	assert.PanicsWithValue(t, "nil compare", func() {
-		_ = NewLLRBTree[int](nil)
+		_ = New[int](nil)
 	})
 }
 
@@ -26,7 +25,7 @@ func TestLLRBTree_insert(t *testing.T) {
 	const LOOP = 100
 
 	assert := assert.New(t)
-	tree := NewLLRBTree[int](cmp.Compare[int])
+	tree := NewOrdered[int]()
 
 	a := seq(N)
 
@@ -44,7 +43,7 @@ func TestLLRBTree_insert(t *testing.T) {
 
 func TestLLRBTree_random_insert_delete(t *testing.T) {
 	assert := assert.New(t)
-	tree := NewLLRBTree[int](cmp.Compare[int])
+	tree := NewOrdered[int]()
 
 	const N = 10000
 
@@ -91,7 +90,7 @@ func TestLLRBTree_iterator(t *testing.T) {
 	assert := assert.New(t)
 
 	a := seq(100)
-	tree := NewLLRBTree[int](cmp.Compare[int])
+	tree := NewOrdered[int]()
 	for _, x := range a {
 		tree.ReplaceOrInsert(x)
 	}
@@ -166,7 +165,7 @@ func TestLLRBTree_iterator_break(t *testing.T) {
 	assert := assert.New(t)
 
 	a := seq(100)
-	tree := NewLLRBTree[int](cmp.Compare[int])
+	tree := NewOrdered[int]()
 	for _, x := range a {
 		tree.ReplaceOrInsert(x)
 	}
@@ -206,7 +205,7 @@ func BenchmarkLLRBTree_insert_random(b *testing.B) {
 		runtime.GC()
 		b.StartTimer()
 
-		t := NewLLRBTree[int](cmp.Compare[int])
+		t := NewOrdered[int]()
 		for _, x := range a {
 			prev, exist := t.ReplaceOrInsert(x)
 
@@ -229,7 +228,7 @@ func BenchmarkLLRBTree_insert_ascending(b *testing.B) {
 		runtime.GC()
 		b.StartTimer()
 
-		t := NewLLRBTree[int](cmp.Compare[int])
+		t := NewOrdered[int]()
 		for _, x := range a {
 			prev, exist := t.ReplaceOrInsert(x)
 
@@ -252,7 +251,7 @@ func BenchmarkLLRBTree_get_random(b *testing.B) {
 		b.StopTimer()
 		shuffle(a)
 		shuffle(getOps)
-		t := NewLLRBTree[int](cmp.Compare[int])
+		t := NewOrdered[int]()
 		for _, x := range a {
 			_, _ = t.ReplaceOrInsert(x)
 		}
@@ -279,7 +278,7 @@ func BenchmarkLLRBTree_get_ascending(b *testing.B) {
 	a := seq(L)
 	getOps := seq(2 * L)
 
-	t := NewLLRBTree[int](cmp.Compare[int])
+	t := NewOrdered[int]()
 	for _, x := range a {
 		_, _ = t.ReplaceOrInsert(x)
 	}

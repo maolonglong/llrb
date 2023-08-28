@@ -15,7 +15,7 @@ type LLRBSet[T cmp.Ordered] struct {
 // NewSet creates a new LLRBSet.
 func NewSet[T cmp.Ordered]() *LLRBSet[T] {
 	return &LLRBSet[T]{
-		tr: NewLLRBTree[T](cmp.Compare[T]),
+		tr: NewOrdered[T](),
 	}
 }
 

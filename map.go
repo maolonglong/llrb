@@ -22,7 +22,7 @@ func compareMapEntry[K cmp.Ordered, V any](e1, e2 *entry[K, V]) int {
 // NewMap creates a new LLRBMap.
 func NewMap[K cmp.Ordered, V any]() *LLRBMap[K, V] {
 	return &LLRBMap[K, V]{
-		tr: NewLLRBTree[*entry[K, V]](compareMapEntry[K, V]),
+		tr: New[*entry[K, V]](compareMapEntry[K, V]),
 	}
 }
 
