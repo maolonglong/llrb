@@ -1,4 +1,4 @@
-// Copyright 2023 Shaolong Chen. All rights reserved.
+// Copyright 2024 Shaolong Chen. All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -11,6 +11,7 @@ type entry[K cmp.Ordered, V any] struct {
 	value V
 }
 
+// LLRBMap represents a left-leaning red-black tree map.
 type LLRBMap[K cmp.Ordered, V any] struct {
 	tr *LLRBTree[*entry[K, V]]
 }

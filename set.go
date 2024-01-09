@@ -1,4 +1,4 @@
-// Copyright 2023 Shaolong Chen. All rights reserved.
+// Copyright 2024 Shaolong Chen. All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -8,6 +8,7 @@ import (
 	"cmp"
 )
 
+// LLRBSet represents a set data structure implemented using a Left-Leaning Red-Black Tree.
 type LLRBSet[T cmp.Ordered] struct {
 	tr *LLRBTree[T]
 }

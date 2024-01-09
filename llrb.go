@@ -1,4 +1,4 @@
-// Copyright 2023 Shaolong Chen. All rights reserved.
+// Copyright 2024 Shaolong Chen. All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -17,10 +17,13 @@ const (
 	_black = false
 )
 
-type (
-	CompareFunc[T any] func(a, b T) int
-	IterFunc[T any]    func(a T) bool
-)
+// CompareFunc is a function type that compares two values of type T and returns an integer.
+// It should return a negative value if a < b, 0 if a == b, and a positive value if a > b.
+type CompareFunc[T any] func(a, b T) int
+
+// IterFunc is a function type that takes a value of type T and returns a boolean.
+// It should return true to continue iteration, or false to stop iteration.
+type IterFunc[T any] func(a T) bool
 
 // LLRBTree is a Left-Leaning Red-Black (LLRB) implementation of 2-3 trees.
 type LLRBTree[T any] struct {
@@ -52,11 +55,11 @@ func NewOrdered[T cmp.Ordered]() *LLRBTree[T] {
 	}
 }
 
-// ReplaceOrInsert adds the given item to the tree.  If an item in the tree
+// ReplaceOrInsert adds the given item to the tree. If an item in the tree
 // already equals the given one, it is removed from the tree and returned,
-// and the second return value is true.  Otherwise, (zeroValue, false)
+// and the second return value is true. Otherwise, (zeroValue, false) is returned.
 //
-// nil cannot be added to the tree (undefined behavior).
+// Note: nil cannot be added to the tree (undefined behavior).
 func (t *LLRBTree[T]) ReplaceOrInsert(item T) (prev T, exist bool) {
 	t.root, prev, exist = t.insert(t.root, item)
 	t.root.color = _black
@@ -91,7 +94,7 @@ func (t *LLRBTree[T]) Has(item T) bool {
 }
 
 // DeleteMin removes the smallest item in the tree and returns it.
-// If no such item exists, returns nil.
+// If no such item exists, it returns (nil, false).
 func (t *LLRBTree[T]) DeleteMin() (deleted T, ok bool) {
 	t.root, deleted, ok = t.deleteMin(t.root)
 	if t.root != nil {
@@ -104,7 +107,7 @@ func (t *LLRBTree[T]) DeleteMin() (deleted T, ok bool) {
 }
 
 // DeleteMax removes the largest item in the tree and returns it.
-// If no such item exists, returns nil.
+// If no such item exists, it returns (nil, false).
 func (t *LLRBTree[T]) DeleteMax() (deleted T, ok bool) {
 	t.root, deleted, ok = t.deleteMax(t.root)
 	if t.root != nil {
@@ -116,8 +119,8 @@ func (t *LLRBTree[T]) DeleteMax() (deleted T, ok bool) {
 	return deleted, ok
 }
 
-// Delete removes an item equal to the passed in item from the tree, returning
-// it.  If no such item exists, returns nil.
+// Delete removes an item equal to the passed-in item from the tree, returning
+// it. If no such item exists, it returns (nil, false).
 func (t *LLRBTree[T]) Delete(item T) (deleted T, ok bool) {
 	t.root, deleted, ok = t.delete(t.root, item)
 	if t.root != nil {
@@ -141,72 +144,72 @@ func (t *LLRBTree[T]) Len() int {
 }
 
 // AscendRange calls the iterator for every value in the tree within the range
-// [greaterOrEqual, lessThan), until iterator returns false.
+// [greaterOrEqual, lessThan), until the iterator returns false.
 func (t *LLRBTree[T]) AscendRange(greaterOrEqual, lessThan T, iter IterFunc[T]) {
-	t.iterate(t.root, false,
+	t.iterateAsc(t.root,
 		nullItem[T]{item: greaterOrEqual, valid: true},
 		nullItem[T]{item: lessThan, valid: true},
 		iter)
 }
 
 // AscendLessThan calls the iterator for every value in the tree within the range
-// [first, pivot), until iterator returns false.
+// [first, pivot), until the iterator returns false.
 func (t *LLRBTree[T]) AscendLessThan(pivot T, iter IterFunc[T]) {
-	t.iterate(t.root, false,
+	t.iterateAsc(t.root,
 		nullItem[T]{valid: false},
 		nullItem[T]{item: pivot, valid: true},
 		iter)
 }
 
 // AscendGreaterOrEqual calls the iterator for every value in the tree within
-// the range [pivot, last], until iterator returns false.
+// the range [pivot, last], until the iterator returns false.
 func (t *LLRBTree[T]) AscendGreaterOrEqual(pivot T, iter IterFunc[T]) {
-	t.iterate(t.root, false,
+	t.iterateAsc(t.root,
 		nullItem[T]{item: pivot, valid: true},
 		nullItem[T]{valid: false},
 		iter)
 }
 
 // Ascend calls the iterator for every value in the tree within the range
-// [first, last], until iterator returns false.
+// [first, last], until the iterator returns false.
 func (t *LLRBTree[T]) Ascend(iter IterFunc[T]) {
-	t.iterate(t.root, false,
+	t.iterateAsc(t.root,
 		nullItem[T]{valid: false},
 		nullItem[T]{valid: false},
 		iter)
 }
 
 // DescendRange calls the iterator for every value in the tree within the range
-// [lessOrEqual, greaterThan), until iterator returns false.
+// [lessOrEqual, greaterThan), until the iterator returns false.
 func (t *LLRBTree[T]) DescendRange(lessOrEqual, greaterThan T, iter IterFunc[T]) {
-	t.iterate(t.root, true,
+	t.iterateDesc(t.root,
 		nullItem[T]{item: lessOrEqual, valid: true},
 		nullItem[T]{item: greaterThan, valid: true},
 		iter)
 }
 
 // DescendLessOrEqual calls the iterator for every value in the tree within the range
-// [pivot, first], until iterator returns false.
+// [pivot, first], until the iterator returns false.
 func (t *LLRBTree[T]) DescendLessOrEqual(pivot T, iter IterFunc[T]) {
-	t.iterate(t.root, true,
+	t.iterateDesc(t.root,
 		nullItem[T]{item: pivot, valid: true},
 		nullItem[T]{valid: false},
 		iter)
 }
 
 // DescendGreaterThan calls the iterator for every value in the tree within
-// the range [last, pivot), until iterator returns false.
+// the range [last, pivot), until the iterator returns false.
 func (t *LLRBTree[T]) DescendGreaterThan(pivot T, iter IterFunc[T]) {
-	t.iterate(t.root, true,
+	t.iterateDesc(t.root,
 		nullItem[T]{valid: false},
 		nullItem[T]{item: pivot, valid: true},
 		iter)
 }
 
 // Descend calls the iterator for every value in the tree within the range
-// [last, first], until iterator returns false.
+// [last, first], until the iterator returns false.
 func (t *LLRBTree[T]) Descend(iter IterFunc[T]) {
-	t.iterate(t.root, true,
+	t.iterateDesc(t.root,
 		nullItem[T]{valid: false},
 		nullItem[T]{valid: false},
 		iter)
@@ -311,45 +314,50 @@ type nullItem[T any] struct {
 	valid bool
 }
 
-func (t *LLRBTree[T]) iterate(
+func (t *LLRBTree[T]) iterateAsc(
 	h *node[T],
-	desc bool,
 	start, end nullItem[T],
 	iter IterFunc[T],
 ) bool {
 	if h == nil {
 		return true
 	}
-
-	if !desc {
-		if end.valid && t.compare(h.item, end.item) >= 0 {
-			return t.iterate(h.left, desc, start, end, iter)
-		}
-		if start.valid && t.compare(h.item, start.item) < 0 {
-			return t.iterate(h.right, desc, start, end, iter)
-		}
-		if !t.iterate(h.left, desc, start, end, iter) {
-			return false
-		}
-		if !iter(h.item) {
-			return false
-		}
-		return t.iterate(h.right, desc, start, end, iter)
-	} else {
-		if end.valid && t.compare(h.item, end.item) <= 0 {
-			return t.iterate(h.right, desc, start, end, iter)
-		}
-		if start.valid && t.compare(h.item, start.item) > 0 {
-			return t.iterate(h.left, desc, start, end, iter)
-		}
-		if !t.iterate(h.right, desc, start, end, iter) {
-			return false
-		}
-		if !iter(h.item) {
-			return false
-		}
-		return t.iterate(h.left, desc, start, end, iter)
+	if end.valid && t.compare(h.item, end.item) >= 0 {
+		return t.iterateAsc(h.left, start, end, iter)
 	}
+	if start.valid && t.compare(h.item, start.item) < 0 {
+		return t.iterateAsc(h.right, start, end, iter)
+	}
+	if !t.iterateAsc(h.left, start, end, iter) {
+		return false
+	}
+	if !iter(h.item) {
+		return false
+	}
+	return t.iterateAsc(h.right, start, end, iter)
+}
+
+func (t *LLRBTree[T]) iterateDesc(
+	h *node[T],
+	start, end nullItem[T],
+	iter IterFunc[T],
+) bool {
+	if h == nil {
+		return true
+	}
+	if end.valid && t.compare(h.item, end.item) <= 0 {
+		return t.iterateDesc(h.right, start, end, iter)
+	}
+	if start.valid && t.compare(h.item, start.item) > 0 {
+		return t.iterateDesc(h.left, start, end, iter)
+	}
+	if !t.iterateDesc(h.right, start, end, iter) {
+		return false
+	}
+	if !iter(h.item) {
+		return false
+	}
+	return t.iterateDesc(h.left, start, end, iter)
 }
 
 func newNode[T any](item T) *node[T] {
